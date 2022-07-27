@@ -1,5 +1,4 @@
 ## trpc-reducer
-[tRPC](https://trpc.io/)-ified [SWR](https://swr.vercel.app/) hooks
 
 - A trpc-ified react useReducer hook that lets you perform state logic in reducers.
 - This hook solves a specific problem which is updating the cache on mutations, but with actions and dispatches that comes from the useReducer architecture
