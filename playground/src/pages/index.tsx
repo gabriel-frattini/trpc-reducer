@@ -20,7 +20,7 @@ const Home: NextPage = () => {
         <link rel='icon' href='/favicon.ico' />
       </Head>
       <main>
-        <h1>UseTrpcReducer</h1>
+        <h1>trpc-reducer</h1>
 
         <form
           onSubmit={(e) => {
