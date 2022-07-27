@@ -1,7 +1,7 @@
 ## trpc-reducer
 
-- A trpc-ified react useReducer hook that lets you perform state logic in reducers.
-- This hook solves a specific problem which is updating the cache on mutations, but with actions and dispatches that comes from the useReducer architecture
+- A trpc-ified react useReducer hook that lets you perform state logic in reducers just like React's [useReducer](https://reactjs.org/docs/hooks-reference.html#usereducer) hook
+- When you dispatch an action, the new state updates the cache on the mutation's ```onSuccess() function```
 
 ## Installation
 
@@ -11,14 +11,14 @@ npm install trpc-reducer trpc
 
 ## Usage
 
-First, create your reducer and wrap it with the ReducerOutput type:
+First, create your reducer:
 
 ```ts
 // utils/reducer.ts
 import type { AppRouter } from './trpc'
-import type { ReducerOutput } from 'trpc-reducer'
+import type { ReducerOutput, ReducerActions } from 'trpc-reducer'
 
-export function myReducer(state: any, action: any): ReducerOutput<AppRouter> {
+export function myReducer(state: any, action: ReducerActions<AppRouter>): ReducerOutput<AppRouter> {
   switch (action.type[0]) {
     case 'example.user.create':
       return {
@@ -34,19 +34,18 @@ export function myReducer(state: any, action: any): ReducerOutput<AppRouter> {
   }
 }
 ```
-
-Use it:
+create the reducer hook
 ```ts
 // utils/trpc.ts
-import { myReducer } from './reducer'
 import { createTrpcReducer } from 'trpc-reducer'
-// `import type` ensures this import is fully erased at runtime
+import { myReducer } from './reducer'
 import type { AppRouter } from './router'
 
 export const trpc = createReactQueryHooks<AppRouter>()
 export const trpcReducer = createTrpcReducer(myReducer, trpc)
 ```
 
+Use it:
 ```ts
 // pages/_index.tsx
 import { trpcReducer } from '../utils/trpc'
@@ -56,8 +55,7 @@ const Index = () => {
   const { state, dispatch } = trpcReducer.useTRPCReducer(
   ['example.users.get'],
   {
-    arg_0: ['example.user.create'],
-    arg_1: ['example.user.delete'],
+    arg_0: ['example.user.create']
   },
 )
 
