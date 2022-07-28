@@ -52,7 +52,7 @@ export type ReducerActions<
   >[keyof TRouter['_def']['mutations'] & string]['input']
 }
 
-export function createTRPCReducer<TRouter extends AnyRouter>(
+export function createTrpcReducer<TRouter extends AnyRouter>(
   reducer: (
     state: InferQueryOutput<TRouter>,
     action: {

@@ -1,8 +1,9 @@
-import { ReducerOutput } from 'trpc-reducer'
+import { ReducerActions, ReducerOutput } from 'trpc-reducer'
 import { AppRouter } from '../src/server/router'
 
 export function myReducer(
-  { state, action }: any,
+  state: any,
+  action: ReducerActions<AppRouter>,
 ): ReducerOutput<AppRouter> {
   switch (action.type[0]) {
     case 'example.user.create':
