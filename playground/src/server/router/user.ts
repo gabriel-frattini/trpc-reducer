@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { createRouter } from './context'
 
-export const exampleRouter = createRouter()
+export const userRouter = createRouter()
   .query('users.get', {
     async resolve({ ctx }) {
       const users = await ctx.prisma.user.findMany()

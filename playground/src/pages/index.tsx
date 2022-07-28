@@ -5,7 +5,7 @@ import { trpcReducer } from '../../utils/trpc'
 
 const Home: NextPage = () => {
   const [input, setInput] = useState('')
-  const { state, dispatch } = trpcReducer.useTRPCReducer(
+  const { state, dispatch } = trpcReducer.useTrpcReducer(
     ['example.users.get'],
     {
       arg_0: ['example.user.create'],

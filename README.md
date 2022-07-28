@@ -1,7 +1,7 @@
 ## trpc-reducer
 
 - A trpc-ified react useReducer hook that lets you perform state logic in reducers just like React's [useReducer](https://reactjs.org/docs/hooks-reference.html#usereducer) hook
-- When you dispatch an action, the new state updates the cache on the mutation's ```onSuccess() function```
+- When you dispatch an action, the new state updates the cache on the mutation's `onSuccess()` function
 
 ## Installation
 
@@ -15,10 +15,13 @@ First, create your reducer:
 
 ```ts
 // utils/reducer.ts
+import type { ReducerActions, ReducerOutput } from 'trpc-reducer'
 import type { AppRouter } from './trpc'
-import type { ReducerOutput, ReducerActions } from 'trpc-reducer'
 
-export function myReducer(state: any, action: ReducerActions<AppRouter>): ReducerOutput<AppRouter> {
+export function myReducer(
+  state: any,
+  action: ReducerActions<AppRouter>,
+): ReducerOutput<AppRouter> {
   switch (action.type[0]) {
     case 'example.user.create':
       return {
@@ -34,7 +37,9 @@ export function myReducer(state: any, action: ReducerActions<AppRouter>): Reduce
   }
 }
 ```
-create the reducer hook
+
+then create the reducer hook:
+
 ```ts
 // utils/trpc.ts
 import { createTrpcReducer } from 'trpc-reducer'
@@ -46,56 +51,57 @@ export const trpcReducer = createTrpcReducer(myReducer, trpc)
 ```
 
 Use it:
+
 ```ts
 // pages/_index.tsx
 import { trpcReducer } from '../utils/trpc'
 
 const Index = () => {
   const [input, setInput] = useState('')
-  const { state, dispatch } = trpcReducer.useTRPCReducer(
-  ['example.users.get'],
-  {
-    arg_0: ['example.user.create']
-  },
-)
+  const { state, dispatch } = trpcReducer.useTrpcReducer(
+    ['example.users.get'],
+    {
+      arg_0: ['example.user.create'],
+    },
+  )
 
   return (
-   <main>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault()
-            dispatch({
-              payload: {
-                name: input,
-                id: new Date().toTimeString().slice(0, 8),
-              },
-              type: ['example.user.create'],
-            })
-            setInput('')
-          }}
-        >
-          <label htmlFor='name'>Name</label>
-          <input
-            type='text'
-            name='name'
-            id='name'
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-          />
-          <button disabled={state.isLoading} type='submit'>
-            {state.isLoading ? 'loading...' : 'Add Name'}
-          </button>
-        </form>
+    <main>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault()
+          dispatch({
+            payload: {
+              name: input,
+              id: new Date().toTimeString().slice(0, 8),
+            },
+            type: ['example.user.create'],
+          })
+          setInput('')
+        }}
+      >
+        <label htmlFor='name'>Name</label>
+        <input
+          type='text'
+          name='name'
+          id='name'
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+        />
+        <button disabled={state.isLoading} type='submit'>
+          {state.isLoading ? 'loading...' : 'Add Name'}
+        </button>
+      </form>
 
-        <ul>
-          {state.data
-            && state.data.users.map((user, idx) => (
-              <li key={idx}>
-                {user.name}
-              </li>
-            ))}
-        </ul>
-      </main>
+      <ul>
+        {state.data
+          && state.data.users.map((user, idx) => (
+            <li key={idx}>
+              {user.name}
+            </li>
+          ))}
+      </ul>
+    </main>
   )
 }
 ```

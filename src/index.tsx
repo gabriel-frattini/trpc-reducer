@@ -62,7 +62,7 @@ export function createTRPCReducer<TRouter extends AnyRouter>(
   ) => ReducerOutput<TRouter>,
   trpcApi: any,
 ) {
-  function useTRPCReducer<TRouter extends AnyRouter>(
+  function useTrpcReducer<TRouter extends AnyRouter>(
     prevState: [
       path: keyof TRouter['_def']['queries'] & string,
       ...args: inferHandlerInput<
@@ -75,7 +75,7 @@ export function createTRPCReducer<TRouter extends AnyRouter>(
     },
   ) {
     const cacheKey = prevState as unknown as TPathAndInput<TRouter>
-    
+
     const { useQuery, useMutation, useContext } = trpcApi
     const ctx = useContext()
 
@@ -141,6 +141,6 @@ export function createTRPCReducer<TRouter extends AnyRouter>(
   }
 
   return {
-    useTRPCReducer,
+    useTrpcReducer,
   }
 }
