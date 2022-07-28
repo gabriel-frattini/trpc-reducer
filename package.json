@@ -5,11 +5,11 @@
   "description": "tRPC-ified useReducer hook",
   "repository": {
     "type": "git",
-    "url": "https://github.com/gabrielfrattini/trpc-reducer.git"
+    "url": "https://github.com/gabriel-frattini/trpc-reducer.git"
   },
-  "homepage": "https://github.com/gabrielfrattini/trpc-reducer#readme",
+  "homepage": "https://github.com/gabriel-frattini/trpc-reducer#readme",
   "bugs": {
-    "url": "https://github.com/gabrielfrattini/trpc-reducer/issues"
+    "url": "https://github.com/gabriel-frattini/trpc-reducer/issues"
   },
   "author": "Gabriele Frattini <gabbefrattini@gmail.com>",
   "license": "MIT",
