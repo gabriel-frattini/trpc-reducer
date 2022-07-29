@@ -13,7 +13,7 @@ package-lock.json
 /prisma/db.sqlite
 /prisma/dev.db
 /prisma/db.sqlite-journal
-/prisma/migrations
+/prisma/migrations/*
 
 
 # next.js
