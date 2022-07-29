@@ -4,13 +4,17 @@
 /node_modules
 /.pnp
 .pnp.js
+package-lock.json
 
 # testing
 /coverage
 
 # database
 /prisma/db.sqlite
+/prisma/dev.db
 /prisma/db.sqlite-journal
+/prisma/migrations
+
 
 # next.js
 /.next/
