@@ -59,7 +59,9 @@ import { trpcReducer } from '../utils/trpc'
 const Index = () => {
   const [input, setInput] = useState('')
   const { state, dispatch } = trpcReducer.useTrpcReducer(
+    // fetch state
     ['example.users.get'],
+    // actions
     {
       arg_0: ['example.user.create'],
     },
