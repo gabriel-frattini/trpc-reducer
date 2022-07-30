@@ -54,15 +54,12 @@ export type ReducerActions<
 
 export function createTrpcReducer<TRouter extends AnyRouter>(
   reducer: (
-    state: InferQueryOutput<TRouter>,
-    action: {
-      type: [keyof TRouter['_def']['mutations'] & string]
-      payload: any
-    },
+    state: any,
+    action: ReducerActions<TRouter>,
   ) => ReducerOutput<TRouter>,
   trpcApi: any,
 ) {
-  function useTrpcReducer<TRouter extends AnyRouter>(
+  function useTrpcReducer(
     prevState: [
       path: keyof TRouter['_def']['queries'] & string,
       ...args: inferHandlerInput<
@@ -87,7 +84,7 @@ export function createTrpcReducer<TRouter extends AnyRouter>(
       type,
       payload,
     }: {
-      type: [keyof ActionMap<InferMutationPathAndInput<TRouter>> & string]
+      type: keyof ActionMap<InferMutationPathAndInput<TRouter>> & string
       payload: inferProcedures<
         TRouter['_def']['mutations']
       >[keyof TRouter['_def']['mutations'] & string]['input']

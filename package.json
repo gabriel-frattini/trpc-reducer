@@ -1,6 +1,6 @@
 {
   "name": "trpc-reducer",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "type": "module",
   "description": "tRPC-ified useReducer hook",
   "repository": {
