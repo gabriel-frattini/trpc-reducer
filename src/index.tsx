@@ -1,4 +1,5 @@
 import { AnyRouter, inferHandlerInput, inferProcedureInput, inferProcedureOutput, ProcedureRecord } from '@trpc/server'
+import { UseMutationResult, UseQueryResult } from 'react-query'
 
 type TQuery<TRouter extends AnyRouter> = keyof TRouter['_def']['queries']
 
@@ -52,26 +53,32 @@ export type ReducerActions<
   >[keyof TRouter['_def']['mutations'] & string]['input']
 }
 
+type TPathAndArgs<TRouter extends AnyRouter> = [
+  path: keyof TRouter['_def']['queries'] & string,
+  ...args: inferHandlerInput<
+    TRouter['_def']['queries'][keyof TRouter['_def']['queries'] & string]
+  >,
+]
+
+interface TrpcInterface<TRouter extends AnyRouter> {
+  useMutation: (q: [keyof TRouter['_def']['mutations'] & string]) => UseMutationResult
+  useQuery: (q: TPathAndArgs<TRouter>) => UseQueryResult
+  useContext: any
+}
+
 export function createTrpcReducer<
   TRouter extends AnyRouter,
-  TMutationPath extends [keyof TRouter['_def']['mutations' & string]],
 >(
   reducer: (
     state: InferQueryOutput<TRouter>,
-    action: {
-      type: TMutationPath
-      payload: any
-    },
+    action: ReducerActions<TRouter>,
   ) => ReducerOutput<TRouter>,
   trpcApi: any,
 ) {
+  type TMutationPath = [keyof TRouter['_def']['mutations'] & string]
+
   function useTrpcReducer<TRouter extends AnyRouter>(
-    prevState: [
-      path: keyof TRouter['_def']['queries'] & string,
-      ...args: inferHandlerInput<
-        TRouter['_def']['queries'][keyof TRouter['_def']['queries'] & string]
-      >,
-    ],
+    prevState: TPathAndArgs<TRouter>,
     actions: {
       arg_0: TMutationPath
       arg_1?: TMutationPath
@@ -80,15 +87,14 @@ export function createTrpcReducer<
     },
   ) {
     const cacheKey = prevState as unknown as TPathAndInput<TRouter>
-
-    const { useQuery, useMutation, useContext } = trpcApi
+    const { useQuery, useMutation, useContext } = trpcApi as unknown as TrpcInterface<TRouter>
     const ctx = useContext()
 
     const procedureQuery = useQuery(prevState)
     const firstProcedureMutation = useMutation(actions.arg_0)
-    const secondProcedureMutation = useMutation(actions.arg_1)
-    const thirdProcedureMutation = useMutation(actions.arg_2)
-    const fourthProcedureMutation = useMutation(actions.arg_3)
+    const secondProcedureMutation = useMutation(actions.arg_1 ? actions.arg_1 : [''])
+    const thirdProcedureMutation = useMutation(actions.arg_2 ? actions.arg_2 : [''])
+    const fourthProcedureMutation = useMutation(actions.arg_3 ? actions.arg_3 : [''])
 
     function updateState({ mutation, payload, type }: { mutation: any; payload: any; type: any }) {
       mutation.mutate(payload, {
