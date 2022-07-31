@@ -62,7 +62,7 @@ type TPathAndArgs<TRouter extends AnyRouter> = [
 
 interface TrpcInterface<TRouter extends AnyRouter> {
   useMutation: (q: [keyof TRouter['_def']['mutations'] & string]) => UseMutationResult
-  useQuery: (q: TPathAndArgs<TRouter>) => UseQueryResult
+  useQuery: (q: TPathAndArgs<TRouter>) => UseQueryResult<ReducerOutput<TRouter>, unknown>
   useContext: any
 }
 
@@ -77,7 +77,7 @@ export function createTrpcReducer<
 ) {
   type TMutationPath = [keyof TRouter['_def']['mutations'] & string]
 
-  function useTrpcReducer<TRouter extends AnyRouter>(
+  function useTrpcReducer(
     prevState: TPathAndArgs<TRouter>,
     actions: {
       arg_0: TMutationPath
@@ -91,6 +91,7 @@ export function createTrpcReducer<
     const ctx = useContext()
 
     const procedureQuery = useQuery(prevState)
+    
     const firstProcedureMutation = useMutation(actions.arg_0)
     const secondProcedureMutation = useMutation(actions.arg_1 ? actions.arg_1 : [''])
     const thirdProcedureMutation = useMutation(actions.arg_2 ? actions.arg_2 : [''])
