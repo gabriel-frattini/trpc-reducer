@@ -52,11 +52,14 @@ export type ReducerActions<
   >[keyof TRouter['_def']['mutations'] & string]['input']
 }
 
-export function createTrpcReducer<TRouter extends AnyRouter>(
+export function createTrpcReducer<
+  TRouter extends AnyRouter,
+  TMutationPath extends [keyof TRouter['_def']['mutations' & string]],
+>(
   reducer: (
     state: InferQueryOutput<TRouter>,
     action: {
-      type: [keyof TRouter['_def']['mutations'] & string]
+      type: TMutationPath
       payload: any
     },
   ) => ReducerOutput<TRouter>,
@@ -70,8 +73,10 @@ export function createTrpcReducer<TRouter extends AnyRouter>(
       >,
     ],
     actions: {
-      arg_0: [keyof TRouter['_def']['mutations'] & string]
-      arg_1?: [keyof TRouter['_def']['mutations'] & string]
+      arg_0: TMutationPath
+      arg_1?: TMutationPath
+      arg_2?: TMutationPath
+      arg_3?: TMutationPath
     },
   ) {
     const cacheKey = prevState as unknown as TPathAndInput<TRouter>
@@ -82,6 +87,31 @@ export function createTrpcReducer<TRouter extends AnyRouter>(
     const procedureQuery = useQuery(prevState)
     const firstProcedureMutation = useMutation(actions.arg_0)
     const secondProcedureMutation = useMutation(actions.arg_1)
+    const thirdProcedureMutation = useMutation(actions.arg_2)
+    const fourthProcedureMutation = useMutation(actions.arg_3)
+
+    function updateState({ mutation, payload, type }: { mutation: any; payload: any; type: any }) {
+      mutation.mutate(payload, {
+        onSuccess: async () => {
+          await ctx.cancelQuery(cacheKey)
+          const cachedState = ctx.getQueryData(cacheKey)
+          if (cachedState) {
+            const newState = reducer(cachedState, {
+              payload,
+              type,
+            })
+            ctx.setQueryData(cacheKey, { ...newState })
+          }
+          return { cachedState }
+        },
+        onError: (context: any) => {
+          if (context?.cachedData) {
+            ctx.setQueryData(cacheKey, context.cachedData)
+          }
+        },
+      })
+      return { state: procedureQuery, dispatch }
+    }
 
     function dispatch({
       type,
@@ -93,48 +123,16 @@ export function createTrpcReducer<TRouter extends AnyRouter>(
       >[keyof TRouter['_def']['mutations'] & string]['input']
     }) {
       if (type[0] === actions.arg_0[0]) {
-        firstProcedureMutation.mutate(payload, {
-          onSuccess: async () => {
-            await ctx.cancelQuery(cacheKey)
-            const cachedState = ctx.getQueryData(cacheKey)
-            if (cachedState) {
-              const newState = reducer(cachedState, {
-                payload,
-                type,
-              })
-              ctx.setQueryData(cacheKey, { ...newState })
-            }
-            return { cachedState }
-          },
-          onError: (context: any) => {
-            if (context?.cachedData) {
-              ctx.setQueryData(cacheKey, context.cachedData)
-            }
-          },
-        })
-        return { state: procedureQuery, dispatch }
+        updateState({ mutation: firstProcedureMutation, payload, type })
       }
       if (actions.arg_1 && type[0] === actions.arg_1[0]) {
-        secondProcedureMutation.mutate(payload, {
-          onSuccess: async () => {
-            await ctx.cancelQuery(cacheKey)
-            const cachedState = ctx.getQueryData(cacheKey)
-            if (cachedState) {
-              const newState = reducer(cachedState, {
-                payload,
-                type,
-              })
-              ctx.setQueryData(cacheKey, { ...newState })
-            }
-            return { cachedState }
-          },
-          onError: (context: any) => {
-            if (context?.cachedData) {
-              ctx.setQueryData(cacheKey, context.cachedData)
-            }
-          },
-        })
-        return { state: procedureQuery, dispatch }
+        updateState({ mutation: secondProcedureMutation, payload, type })
+      }
+      if (actions.arg_2 && type[0] === actions.arg_2[0]) {
+        updateState({ mutation: thirdProcedureMutation, payload, type })
+      }
+      if (actions.arg_3 && type[0] === actions.arg_3[0]) {
+        updateState({ mutation: fourthProcedureMutation, payload, type })
       }
     }
     return { state: procedureQuery, dispatch }

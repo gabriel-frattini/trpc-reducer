@@ -1,6 +1,6 @@
 {
   "name": "trpc-reducer",
-  "version": "0.1.5",
+  "version": "0.1.8",
   "type": "module",
   "description": "tRPC-ified useReducer hook",
   "repository": {
@@ -94,8 +94,5 @@
     },
     "splitting": true,
     "clean": true
-  },
-  "dependencies": {
-    "trpc-reducer": "workspace:^0.1.2"
   }
 }
