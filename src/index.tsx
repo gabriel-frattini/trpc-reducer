@@ -128,7 +128,7 @@ export function createTrpcReducer<
       }
 
       mutation.mutate(payload, {
-        onSuccess: async () => {
+        onSettled: async () => {
           await ctx.cancelQuery(cacheKey)
           const cachedState = ctx.getQueryData(cacheKey)
           if (cachedState) {
@@ -140,10 +140,8 @@ export function createTrpcReducer<
           }
           return { cachedState }
         },
-        onError: (context: any) => {
-          if (context?.cachedData) {
-            ctx.setQueryData(cacheKey, context.cachedData)
-          }
+        onError: (error) => {
+          console.error(error)
         },
       })
       return { state: procedureQuery, dispatch }
