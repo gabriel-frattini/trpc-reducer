@@ -47,7 +47,7 @@ import { myReducer } from './reducer'
 import type { AppRouter } from './router'
 
 export const trpc = createReactQueryHooks<AppRouter>()
-export const trpcReducer = createTrpcReducer(myReducer, trpc)
+export const trpcReducer = createTrpcReducer<AppRouter>(myReducer, trpc)
 ```
 
 Use it:

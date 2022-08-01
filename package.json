@@ -1,6 +1,6 @@
 {
   "name": "trpc-reducer",
-  "version": "0.2.1",
+  "version": "0.2.3",
   "type": "module",
   "description": "tRPC-ified useReducer hook",
   "repository": {
@@ -44,8 +44,7 @@
   "peerDependencies": {
     "@trpc/client": ">=9.23.2",
     "@trpc/server": ">=9.23.2",
-    "react": "^17 || ^18",
-    "swr": "^1"
+    "react": "^17 || ^18"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "5.16.4",
@@ -73,7 +72,6 @@
     "tsup": "5.12.7",
     "typescript": "4.6.4",
     "undici": "5.2.0",
-    "webpack": "5.0.0",
     "zod": "3.16.0"
   },
   "sideEffects": false,

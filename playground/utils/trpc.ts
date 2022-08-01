@@ -1,5 +1,5 @@
 import { createReactQueryHooks } from '@trpc/react'
-import { createTrpcReducer } from '../../dist'
+import { createTrpcReducer } from 'trpc-reducer'
 import type { AppRouter } from '../src/server/router'
 import { myReducer } from './reducer'
 

@@ -1,3 +1,4 @@
+import { TRPCClientErrorLike } from '@trpc/client'
 import { AnyRouter, inferHandlerInput, inferProcedureInput, inferProcedureOutput, ProcedureRecord } from '@trpc/server'
 import { UseMutationResult, UseQueryResult } from 'react-query'
 
@@ -60,9 +61,9 @@ type TPathAndArgs<TRouter extends AnyRouter> = [
   >,
 ]
 
-interface TrpcInterface<TRouter extends AnyRouter, TData> {
+interface TrpcInterface<TRouter extends AnyRouter, TData, TError> {
   useMutation: (q: [keyof TRouter['_def']['mutations'] & string]) => UseMutationResult
-  useQuery: (q: TPathAndArgs<TRouter>) => UseQueryResult<TData, unknown>
+  useQuery: (q: TPathAndArgs<TRouter>) => UseQueryResult<TData, TError>
   useContext: any
 }
 
@@ -77,6 +78,7 @@ export function createTrpcReducer<
 ) {
   type TMutationPath = [keyof TRouter['_def']['mutations'] & string]
   type TQueryValues = inferProcedures<TRouter['_def']['queries']>
+  type TError = TRPCClientErrorLike<TRouter>
   type TQueries = TRouter['_def']['queries']
   function useTrpcReducer<
     TPath extends keyof TQueryValues & string,
@@ -90,7 +92,7 @@ export function createTrpcReducer<
       arg_3?: TMutationPath
     },
   ) {
-    const { useQuery, useMutation, useContext } = trpcApi as unknown as TrpcInterface<TRouter, TData>
+    const { useQuery, useMutation, useContext } = trpcApi as unknown as TrpcInterface<TRouter, TData, TError>
     const ctx = useContext()
 
     const procedureQuery = useQuery(prevState)
