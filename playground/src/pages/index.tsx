@@ -12,6 +12,7 @@ const Home: NextPage = () => {
       arg_1: ['example.user.delete'],
     },
   )
+
   return (
     <>
       <Head>

@@ -9,6 +9,20 @@ export const exampleRouter = createRouter()
       return { users: [] }
     },
   })
+  .query('user.get', {
+    input: z.object({
+      id: z.string(),
+    }),
+    async resolve({ ctx, input: { id } }) {
+      const user = await ctx.prisma.user.findUnique({
+        where: {
+          id,
+        },
+      })
+      if (user) return { user }
+      return { user: {} }
+    },
+  })
   .mutation('user.create', {
     input: z.object({
       name: z.string().min(1).max(20),

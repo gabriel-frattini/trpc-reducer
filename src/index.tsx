@@ -60,9 +60,9 @@ type TPathAndArgs<TRouter extends AnyRouter> = [
   >,
 ]
 
-interface TrpcInterface<TRouter extends AnyRouter> {
+interface TrpcInterface<TRouter extends AnyRouter, TData> {
   useMutation: (q: [keyof TRouter['_def']['mutations'] & string]) => UseMutationResult
-  useQuery: (q: TPathAndArgs<TRouter>) => UseQueryResult<ReducerOutput<TRouter>, unknown>
+  useQuery: (q: TPathAndArgs<TRouter>) => UseQueryResult<TData, unknown>
   useContext: any
 }
 
@@ -76,9 +76,13 @@ export function createTrpcReducer<
   trpcApi: any,
 ) {
   type TMutationPath = [keyof TRouter['_def']['mutations'] & string]
-
-  function useTrpcReducer(
-    prevState: TPathAndArgs<TRouter>,
+  type TQueryValues = inferProcedures<TRouter['_def']['queries']>
+  type TQueries = TRouter['_def']['queries']
+  function useTrpcReducer<
+    TPath extends keyof TQueryValues & string,
+    TData = inferProcedures<TRouter['_def']['queries']>[TPath]['output'],
+  >(
+    prevState: [path: TPath, ...args: inferHandlerInput<TQueries[TPath]>],
     actions: {
       arg_0: TMutationPath
       arg_1?: TMutationPath
@@ -86,34 +90,33 @@ export function createTrpcReducer<
       arg_3?: TMutationPath
     },
   ) {
-    const cacheKey = prevState as unknown as TPathAndInput<TRouter>
-    const { useQuery, useMutation, useContext } = trpcApi as unknown as TrpcInterface<TRouter>
+    const { useQuery, useMutation, useContext } = trpcApi as unknown as TrpcInterface<TRouter, TData>
     const ctx = useContext()
 
     const procedureQuery = useQuery(prevState)
-    
+
     const firstProcedureMutation = useMutation(actions.arg_0)
     const secondProcedureMutation = useMutation(actions.arg_1 ? actions.arg_1 : [''])
     const thirdProcedureMutation = useMutation(actions.arg_2 ? actions.arg_2 : [''])
     const fourthProcedureMutation = useMutation(actions.arg_3 ? actions.arg_3 : [''])
 
-    function updateState({ mutation, payload, type }: { mutation: any; payload: any; type: any }) {
+    function updateState({ mutation, payload, type }: { mutation: UseMutationResult; payload: any; type: any }) {
       mutation.mutate(payload, {
         onSuccess: async () => {
-          await ctx.cancelQuery(cacheKey)
-          const cachedState = ctx.getQueryData(cacheKey)
+          await ctx.cancelQuery(prevState)
+          const cachedState = ctx.getQueryData(prevState)
           if (cachedState) {
             const newState = reducer(cachedState, {
               payload,
               type,
             })
-            ctx.setQueryData(cacheKey, { ...newState })
+            ctx.setQueryData(prevState, { ...newState })
           }
           return { cachedState }
         },
         onError: (context: any) => {
           if (context?.cachedData) {
-            ctx.setQueryData(cacheKey, context.cachedData)
+            ctx.setQueryData(prevState, context.cachedData)
           }
         },
       })
