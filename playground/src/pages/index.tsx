@@ -1,11 +1,13 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import { useState } from 'react'
+import { myReducer } from '../../utils/reducer'
 import { trpcReducer } from '../../utils/trpc'
 
 const Home: NextPage = () => {
   const [input, setInput] = useState('')
   const { state, dispatch } = trpcReducer.useTrpcReducer(
+    myReducer,
     ['example.users.get'],
     {
       arg_0: ['example.user.create'],

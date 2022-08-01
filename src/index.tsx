@@ -61,23 +61,23 @@ export type TDispatch<TRouter extends AnyRouter> = {
 export function createTrpcReducer<
   TRouter extends AnyRouter,
 >(
-  reducer: (
-    state: InferQueryOutput<TRouter>,
-    action: ReducerActions<TRouter>,
-    args: any,
-  ) => ReducerOutput<TRouter>,
   trpcApi: any,
 ) {
   type TMutationPath = [keyof TRouter['_def']['mutations'] & string]
   type TQueryValues = inferProcedures<TRouter['_def']['queries']>
   type TError = TRPCClientErrorLike<TRouter>
   type TQueries = TRouter['_def']['queries']
-  type TOpts = { onlyUpdateCache: boolean; args?: any }
+  type TOpts = { onlyUpdateCache?: boolean; args?: any }
 
   function useTrpcReducer<
     TPath extends keyof TQueryValues & string,
     TData = inferProcedures<TRouter['_def']['queries']>[TPath]['output'],
   >(
+    reducer: (
+      state: InferQueryOutput<TRouter>,
+      action: ReducerActions<TRouter>,
+      args: any,
+    ) => ReducerOutput<TRouter>,
     prevState: [path: TPath, ...args: inferHandlerInput<TQueries[TPath]>],
     actions: {
       arg_0: TMutationPath
@@ -92,15 +92,9 @@ export function createTrpcReducer<
       useQuery: (q: TPathAndArgs<TRouter>) => UseQueryResult<TData, TError>
       useContext: () => TRPCContextState<TRouter>
     }
-
     const ctx = useContext()
 
     const procedureQuery = useQuery(prevState)
-
-    const cacheKey = prevState as unknown as [
-      keyof TRouter['_def']['queries'] & string,
-      (inferProcedureInput<TRouter['_def']['queries'][keyof TRouter['_def']['queries'] & string]>),
-    ]
 
     const firstProcedureMutation = useMutation(actions.arg_0)
     const secondProcedureMutation = useMutation(actions.arg_1 ? actions.arg_1 : [''])
@@ -108,6 +102,10 @@ export function createTrpcReducer<
     const fourthProcedureMutation = useMutation(actions.arg_3 ? actions.arg_3 : [''])
     const fifthProcedureMutation = useMutation(actions.arg_4 ? actions.arg_4 : [''])
 
+    const cacheKey = prevState as unknown as [
+      keyof TRouter['_def']['queries'] & string,
+      (inferProcedureInput<TRouter['_def']['queries'][keyof TRouter['_def']['queries'] & string]>),
+    ]
     function updateState(
       { mutation, action: { payload, type }, opts }: {
         mutation: UseMutationResult

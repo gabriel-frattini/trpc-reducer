@@ -11,7 +11,19 @@ npm install trpc-reducer trpc
 
 ## Usage
 
-First, create your reducer:
+first create your reducer hook:
+
+```ts
+// utils/trpc.ts
+import { createTrpcReducer } from 'trpc-reducer'
+import { myReducer } from './reducer'
+import type { AppRouter } from './router'
+
+export const trpc = createReactQueryHooks<AppRouter>()
+export const trpcReducer = createTrpcReducer<AppRouter>(trpc)
+```
+
+then, create your reducer:
 
 ```ts
 // utils/reducer.ts
@@ -38,18 +50,6 @@ export function myReducer(
 }
 ```
 
-then create the reducer hook:
-
-```ts
-// utils/trpc.ts
-import { createTrpcReducer } from 'trpc-reducer'
-import { myReducer } from './reducer'
-import type { AppRouter } from './router'
-
-export const trpc = createReactQueryHooks<AppRouter>()
-export const trpcReducer = createTrpcReducer<AppRouter>(myReducer, trpc)
-```
-
 Use it:
 
 ```ts
@@ -59,9 +59,11 @@ import { trpcReducer } from '../utils/trpc'
 const Index = () => {
   const [input, setInput] = useState('')
   const { state, dispatch } = trpcReducer.useTrpcReducer(
+    // your reducer
+    myReducer,
     // fetch state
     ['example.users.get'],
-    // actions
+    // your actions
     {
       arg_0: ['example.user.create'],
     },
