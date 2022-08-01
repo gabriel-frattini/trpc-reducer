@@ -1,7 +1,7 @@
 import { TRPCClientErrorLike } from '@trpc/client'
+import { TRPCContextState } from '@trpc/react/src/internals/context'
 import { AnyRouter, inferHandlerInput, inferProcedureInput, inferProcedureOutput, ProcedureRecord } from '@trpc/server'
 import { UseMutationResult, UseQueryResult } from 'react-query'
-
 type TQuery<TRouter extends AnyRouter> = keyof TRouter['_def']['queries']
 
 type InferQueryOutput<
@@ -72,6 +72,8 @@ export function createTrpcReducer<
   type TQueryValues = inferProcedures<TRouter['_def']['queries']>
   type TError = TRPCClientErrorLike<TRouter>
   type TQueries = TRouter['_def']['queries']
+  type TOpts = { onlyUpdateCache: boolean; args?: any }
+
   function useTrpcReducer<
     TPath extends keyof TQueryValues & string,
     TData = inferProcedures<TRouter['_def']['queries']>[TPath]['output'],
@@ -88,62 +90,81 @@ export function createTrpcReducer<
     const { useQuery, useMutation, useContext } = trpcApi as unknown as {
       useMutation: (q: [keyof TRouter['_def']['mutations'] & string]) => UseMutationResult
       useQuery: (q: TPathAndArgs<TRouter>) => UseQueryResult<TData, TError>
-      useContext: any
+      useContext: () => TRPCContextState<TRouter>
     }
+
     const ctx = useContext()
 
     const procedureQuery = useQuery(prevState)
+
+    const cacheKey = prevState as unknown as [
+      keyof TRouter['_def']['queries'] & string,
+      (inferProcedureInput<TRouter['_def']['queries'][keyof TRouter['_def']['queries'] & string]>),
+    ]
 
     const firstProcedureMutation = useMutation(actions.arg_0)
     const secondProcedureMutation = useMutation(actions.arg_1 ? actions.arg_1 : [''])
     const thirdProcedureMutation = useMutation(actions.arg_2 ? actions.arg_2 : [''])
     const fourthProcedureMutation = useMutation(actions.arg_3 ? actions.arg_3 : [''])
     const fifthProcedureMutation = useMutation(actions.arg_4 ? actions.arg_4 : [''])
+
     function updateState(
-      { mutation, action: { payload, type }, args }: {
+      { mutation, action: { payload, type }, opts }: {
         mutation: UseMutationResult
         action: TDispatch<TRouter>
-        args?: any
+        opts?: TOpts
       },
     ) {
+      if (opts && opts.onlyUpdateCache) {
+        const cachedState = ctx.getQueryData(cacheKey)
+        if (cachedState) {
+          const newState = reducer(cachedState, {
+            payload,
+            type,
+          }, opts)
+          ctx.setQueryData(cacheKey, { ...newState })
+          return { cachedState }
+        }
+      }
+
       mutation.mutate(payload, {
         onSuccess: async () => {
-          await ctx.cancelQuery(prevState)
-          const cachedState = ctx.getQueryData(prevState)
+          await ctx.cancelQuery(cacheKey)
+          const cachedState = ctx.getQueryData(cacheKey)
           if (cachedState) {
             const newState = reducer(cachedState, {
               payload,
               type,
-            }, args)
-            ctx.setQueryData(prevState, { ...newState })
+            }, opts)
+            ctx.setQueryData(cacheKey, { ...newState })
           }
           return { cachedState }
         },
         onError: (context: any) => {
           if (context?.cachedData) {
-            ctx.setQueryData(prevState, context.cachedData)
+            ctx.setQueryData(cacheKey, context.cachedData)
           }
         },
       })
       return { state: procedureQuery, dispatch }
     }
 
-    function dispatch(action: TDispatch<TRouter>, args?: any) {
+    function dispatch(action: TDispatch<TRouter>, opts?: TOpts) {
       const { type } = action
       if (type[0] === actions.arg_0[0]) {
-        updateState({ mutation: firstProcedureMutation, action, args })
+        updateState({ mutation: firstProcedureMutation, action, opts })
       }
       if (actions.arg_1 && type[0] === actions.arg_1[0]) {
-        updateState({ mutation: secondProcedureMutation, action, args })
+        updateState({ mutation: secondProcedureMutation, action, opts })
       }
       if (actions.arg_2 && type[0] === actions.arg_2[0]) {
-        updateState({ mutation: thirdProcedureMutation, action, args })
+        updateState({ mutation: thirdProcedureMutation, action, opts })
       }
       if (actions.arg_3 && type[0] === actions.arg_3[0]) {
-        updateState({ mutation: fourthProcedureMutation, action, args })
+        updateState({ mutation: fourthProcedureMutation, action, opts })
       }
       if (actions.arg_4 && type[0] === actions.arg_4[0]) {
-        updateState({ mutation: fifthProcedureMutation, action, args })
+        updateState({ mutation: fifthProcedureMutation, action, opts })
       }
     }
     return { state: procedureQuery, dispatch }
