@@ -16,7 +16,6 @@ first create your reducer hook:
 ```ts
 // utils/trpc.ts
 import { createTrpcReducer } from 'trpc-reducer'
-import { myReducer } from './reducer'
 import type { AppRouter } from './router'
 
 export const trpc = createReactQueryHooks<AppRouter>()
@@ -55,6 +54,7 @@ Use it:
 ```ts
 // pages/_index.tsx
 import { trpcReducer } from '../utils/trpc'
+import { myReducer } from './reducer'
 
 const Index = () => {
   const [input, setInput] = useState('')
