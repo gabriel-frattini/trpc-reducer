@@ -19,20 +19,6 @@ type TPath<TRouter extends AnyRouter> =
   & string
   & keyof TRouter['_def']['queries']
 
-export type ReducerOutput<TRouter extends AnyRouter> = inferProcedureOutput<
-  TRouter['_def']['queries'][TPath<TRouter>]
->
-
-type TPathAndInput<TRouter extends AnyRouter> = [
-  keyof TRouter['_def']['queries'] & string,
-  (
-    | inferProcedureInput<
-      TRouter['_def']['queries'][keyof TRouter['_def']['queries'] & string]
-    >
-    | undefined
-  )?,
-]
-
 type ActionMap<M extends { [index: string]: any }> = {
   [Key in keyof M]: M[Key] extends undefined ? {
     type: Key
@@ -45,15 +31,6 @@ type ActionMap<M extends { [index: string]: any }> = {
 
 type InferMutationPathAndInput<TRouter extends AnyRouter> = inferProcedures<TRouter['_def']['mutations']>
 
-export type ReducerActions<
-  TRouter extends AnyRouter,
-> = {
-  type: keyof ActionMap<InferMutationPathAndInput<TRouter>>
-  payload: inferProcedures<
-    TRouter['_def']['mutations']
-  >[keyof TRouter['_def']['mutations'] & string]['input']
-}
-
 type TPathAndArgs<TRouter extends AnyRouter> = [
   path: keyof TRouter['_def']['queries'] & string,
   ...args: inferHandlerInput<
@@ -61,10 +38,24 @@ type TPathAndArgs<TRouter extends AnyRouter> = [
   >,
 ]
 
-interface TrpcInterface<TRouter extends AnyRouter, TData, TError> {
-  useMutation: (q: [keyof TRouter['_def']['mutations'] & string]) => UseMutationResult
-  useQuery: (q: TPathAndArgs<TRouter>) => UseQueryResult<TData, TError>
-  useContext: any
+export type ReducerOutput<TRouter extends AnyRouter> = inferProcedureOutput<
+  TRouter['_def']['queries'][TPath<TRouter>]
+>
+
+export type ReducerActions<
+  TRouter extends AnyRouter,
+> = {
+  type: [keyof ActionMap<InferMutationPathAndInput<TRouter>>]
+  payload: inferProcedures<
+    TRouter['_def']['mutations']
+  >[keyof TRouter['_def']['mutations'] & string]['input']
+}
+
+export type TDispatch<TRouter extends AnyRouter> = {
+  type: [keyof ActionMap<InferMutationPathAndInput<TRouter>> & string]
+  payload: inferProcedures<
+    TRouter['_def']['mutations']
+  >[keyof TRouter['_def']['mutations'] & string]['input']
 }
 
 export function createTrpcReducer<
@@ -73,6 +64,7 @@ export function createTrpcReducer<
   reducer: (
     state: InferQueryOutput<TRouter>,
     action: ReducerActions<TRouter>,
+    args: any,
   ) => ReducerOutput<TRouter>,
   trpcApi: any,
 ) {
@@ -90,9 +82,14 @@ export function createTrpcReducer<
       arg_1?: TMutationPath
       arg_2?: TMutationPath
       arg_3?: TMutationPath
+      arg_4?: TMutationPath
     },
   ) {
-    const { useQuery, useMutation, useContext } = trpcApi as unknown as TrpcInterface<TRouter, TData, TError>
+    const { useQuery, useMutation, useContext } = trpcApi as unknown as {
+      useMutation: (q: [keyof TRouter['_def']['mutations'] & string]) => UseMutationResult
+      useQuery: (q: TPathAndArgs<TRouter>) => UseQueryResult<TData, TError>
+      useContext: any
+    }
     const ctx = useContext()
 
     const procedureQuery = useQuery(prevState)
@@ -101,8 +98,14 @@ export function createTrpcReducer<
     const secondProcedureMutation = useMutation(actions.arg_1 ? actions.arg_1 : [''])
     const thirdProcedureMutation = useMutation(actions.arg_2 ? actions.arg_2 : [''])
     const fourthProcedureMutation = useMutation(actions.arg_3 ? actions.arg_3 : [''])
-
-    function updateState({ mutation, payload, type }: { mutation: UseMutationResult; payload: any; type: any }) {
+    const fifthProcedureMutation = useMutation(actions.arg_4 ? actions.arg_4 : [''])
+    function updateState(
+      { mutation, action: { payload, type }, args }: {
+        mutation: UseMutationResult
+        action: TDispatch<TRouter>
+        args?: any
+      },
+    ) {
       mutation.mutate(payload, {
         onSuccess: async () => {
           await ctx.cancelQuery(prevState)
@@ -111,7 +114,7 @@ export function createTrpcReducer<
             const newState = reducer(cachedState, {
               payload,
               type,
-            })
+            }, args)
             ctx.setQueryData(prevState, { ...newState })
           }
           return { cachedState }
@@ -125,26 +128,22 @@ export function createTrpcReducer<
       return { state: procedureQuery, dispatch }
     }
 
-    function dispatch({
-      type,
-      payload,
-    }: {
-      type: [keyof ActionMap<InferMutationPathAndInput<TRouter>> & string]
-      payload: inferProcedures<
-        TRouter['_def']['mutations']
-      >[keyof TRouter['_def']['mutations'] & string]['input']
-    }) {
+    function dispatch(action: TDispatch<TRouter>, args?: any) {
+      const { type } = action
       if (type[0] === actions.arg_0[0]) {
-        updateState({ mutation: firstProcedureMutation, payload, type })
+        updateState({ mutation: firstProcedureMutation, action, args })
       }
       if (actions.arg_1 && type[0] === actions.arg_1[0]) {
-        updateState({ mutation: secondProcedureMutation, payload, type })
+        updateState({ mutation: secondProcedureMutation, action, args })
       }
       if (actions.arg_2 && type[0] === actions.arg_2[0]) {
-        updateState({ mutation: thirdProcedureMutation, payload, type })
+        updateState({ mutation: thirdProcedureMutation, action, args })
       }
       if (actions.arg_3 && type[0] === actions.arg_3[0]) {
-        updateState({ mutation: fourthProcedureMutation, payload, type })
+        updateState({ mutation: fourthProcedureMutation, action, args })
+      }
+      if (actions.arg_4 && type[0] === actions.arg_4[0]) {
+        updateState({ mutation: fifthProcedureMutation, action, args })
       }
     }
     return { state: procedureQuery, dispatch }
