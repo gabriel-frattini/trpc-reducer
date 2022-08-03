@@ -1,7 +1,7 @@
 ## trpc-reducer
 
 - A trpc-ified react useReducer hook that lets you perform state logic in reducers just like React's [useReducer](https://reactjs.org/docs/hooks-reference.html#usereducer) hook
-- When you dispatch an action, the new state updates the cache on the mutation's `onSuccess()` function
+- When you dispatch an action, the new state updates the cache on the mutation's `onSettled()` function
 
 ## Installation
 

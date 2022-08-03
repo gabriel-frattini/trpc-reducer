@@ -61,7 +61,16 @@ export type TDispatch<TRouter extends AnyRouter> = {
 export function createTrpcReducer<
   TRouter extends AnyRouter,
 >(
-  trpcApi: any,
+  trpcApi: {
+    Provider: any
+    createClient: any
+    useContext: any
+    useQuery: any
+    useMutation: any
+    useSubscription: any
+    useDehydratedState: any
+    useInfiniteQuery: any
+  },
 ) {
   type TMutationPath = [keyof TRouter['_def']['mutations'] & string]
   type TQueryValues = inferProcedures<TRouter['_def']['queries']>
