@@ -34,7 +34,7 @@ const Home: NextPage = () => {
                 id: new Date().toTimeString().slice(0, 8),
               },
               type: ['example.user.create'],
-            })
+            }, {})
             setInput('')
           }}
         >
@@ -46,8 +46,8 @@ const Home: NextPage = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
           />
-          <button disabled={state.isLoading} type='submit'>
-            {state.isLoading ? 'loading...' : 'Add Name'}
+          <button disabled={state.isDispatching} type='submit'>
+            Add Name
           </button>
         </form>
 

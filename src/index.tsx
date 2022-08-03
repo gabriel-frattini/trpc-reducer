@@ -1,6 +1,7 @@
 import { TRPCClientErrorLike } from '@trpc/client'
 import { TRPCContextState } from '@trpc/react/src/internals/context'
 import { AnyRouter, inferHandlerInput, inferProcedureInput, inferProcedureOutput, ProcedureRecord } from '@trpc/server'
+import { useState } from 'react'
 import { UseMutationResult, UseQueryResult } from 'react-query'
 type TQuery<TRouter extends AnyRouter> = keyof TRouter['_def']['queries']
 
@@ -96,14 +97,16 @@ export function createTrpcReducer<
       arg_4?: TMutationPath
     },
   ) {
+    const [isDispatching, setIsDispatching] = useState(false)
     const { useQuery, useMutation, useContext } = trpcApi as unknown as {
       useMutation: (q: [keyof TRouter['_def']['mutations'] & string]) => UseMutationResult
-      useQuery: (q: TPathAndArgs<TRouter>) => UseQueryResult<TData, TError>
+      useQuery: (q: TPathAndArgs<TRouter>) => (UseQueryResult<TData, TError> & { isDispatching: boolean })
       useContext: () => TRPCContextState<TRouter>
     }
     const ctx = useContext()
 
     const procedureQuery = useQuery(prevState)
+    procedureQuery.isDispatching = isDispatching
 
     const firstProcedureMutation = useMutation(actions.arg_0)
     const secondProcedureMutation = useMutation(actions.arg_1 ? actions.arg_1 : [''])
@@ -122,6 +125,7 @@ export function createTrpcReducer<
         opts?: TOpts
       },
     ) {
+      setIsDispatching(true)
       if (opts && opts.onlyUpdateCache) {
         const cachedState = ctx.getQueryData(cacheKey)
         if (cachedState) {
@@ -133,7 +137,6 @@ export function createTrpcReducer<
           return { cachedState }
         }
       }
-
       mutation.mutate(payload, {
         onSettled: async () => {
           await ctx.cancelQuery(cacheKey)
@@ -145,6 +148,7 @@ export function createTrpcReducer<
             }, opts)
             ctx.setQueryData(cacheKey, { ...newState })
           }
+          setIsDispatching(false)
           return { cachedState }
         },
         onError: (error) => {
