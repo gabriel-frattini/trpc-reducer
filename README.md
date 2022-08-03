@@ -92,7 +92,7 @@ const Index = () => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
         />
-        <button disabled={state.isLoading} type='submit'>
+        <button disabled={state.isDispatching} type='submit'>
           {state.isLoading ? 'loading...' : 'Add Name'}
         </button>
       </form>
