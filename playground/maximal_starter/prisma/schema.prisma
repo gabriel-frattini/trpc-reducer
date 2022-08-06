@@ -1,0 +1,167 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialIntegrity", "fullTextSearch", "fullTextIndex"]
+}
+
+datasource db {
+  provider             = "mysql"
+  url                  = env("DATABASE_URL")
+  referentialIntegrity = "prisma"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model Account {
+  id                       String  @id @default(cuid())
+  userId                   String
+  type                     String
+  provider                 String
+  providerAccountId        String
+  refresh_token            String? @db.VarChar(2000)
+  refresh_token_expires_in Int?
+  access_token             String? @db.VarChar(2000)
+  expires_at               Int?
+  token_type               String?
+  scope                    String?
+  id_token                 String? @db.VarChar(2000)
+  session_state            String? @db.VarChar(2000)
+  oauth_token_secret       String? @db.VarChar(2000)
+  oauth_token              String? @db.VarChar(2000)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model User {
+  id            String          @id @default(cuid())
+  name          String?
+  email         String?         @unique
+  emailVerified DateTime?
+  image         String?
+  title         String?
+  accounts      Account[]
+  sessions      Session[]
+  projects      Project[]
+  comments      Comment[]
+  role          Role            @default(USER)
+  ProjectMember ProjectMember[]
+  requests Request[]
+  votedProjects Vote[]
+}
+
+model Project {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(255)
+  content     String   @db.Text
+  contentHtml String   @db.Text
+  hidden      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId     String
+  requests Request[]
+  comments Comment[]
+  members  ProjectMember[]
+  votedBy Vote[]
+
+  @@index([ownerId])
+  @@fulltext([title, content])
+}
+
+model ProjectMember {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime @default(now())
+  Project   Project  @relation(fields: [projectId], references: [id])
+  projectId Int
+
+  @@index([userId])
+  @@index([projectId])
+}
+
+model Comment {
+  id          Int      @id @default(autoincrement())
+  content     String   @db.Text
+  contentHtml String   @db.Text
+  createdAt   DateTime @default(now())
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId   Int
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId     String
+  private     Boolean
+
+  @@index([ownerId])
+  @@index([projectId])
+}
+
+model Vote {
+  project      Project     @relation(fields: [projectId], references: [id])
+  projectId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime @default(now())
+  type VoteType
+
+  @@id([projectId,userId])
+  @@index([projectId])
+  @@index([userId])
+}
+
+
+model Request {
+  id Int @id @default(autoincrement())
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  projectId Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  userId String
+  createdAt DateTime @default(now())
+  status    Status
+  type Type
+  message   String?   @db.Text
+
+  @@index([projectId])
+  @@index([userId])
+}
+
+enum VoteType {
+  UP
+  DOWN
+}
+
+enum Status {
+  REJECT
+  ACCEPT
+  PENDING
+}
+
+enum Type {
+  JOIN
+  INVITE
+}

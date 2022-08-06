@@ -15,6 +15,8 @@ const Home: NextPage = () => {
     },
   )
 
+  // isDispatching is undefined
+  console.log(state)
   return (
     <>
       <Head>
@@ -46,7 +48,7 @@ const Home: NextPage = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
           />
-          <button disabled={state.isDispatching} type='submit'>
+          <button type='submit'>
             Add Name
           </button>
         </form>
