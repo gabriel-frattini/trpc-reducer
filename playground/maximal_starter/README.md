@@ -1,5 +1,7 @@
 ## Sideclub
 
+A simple social network that allows members to share a sideproject idea and invite other members to join them or request to join someone else.
+
 ## Setup
 
 ### Install dependencies
