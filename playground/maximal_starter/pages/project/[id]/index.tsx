@@ -5,10 +5,10 @@ import * as React from 'react'
 import { Controller, SubmitHandler, useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 
-import { Button } from '@/components/button'
-import { OwnerWithDate } from '@/components/owner-with-date'
+import { ActionButton } from '@/components/action-button'
 import { Avatar } from '@/components/avatar'
 import { Banner } from '@/components/banner'
+import { Button } from '@/components/button'
 import { ButtonLink } from '@/components/button-link'
 import {
   Dialog,
@@ -20,38 +20,20 @@ import {
 } from '@/components/dialog'
 import { HtmlView } from '@/components/html-view'
 import { IconButton } from '@/components/icon-button'
-import {
-  DotsIcon,
-  EditIcon,
-  EyeClosedIcon,
-  EyeIcon,
-  MessageIcon,
-  TrashIcon,
-} from '@/components/icons'
+import { DotsIcon, EditIcon, EyeClosedIcon, EyeIcon, MessageIcon, TrashIcon } from '@/components/icons'
 import { Layout } from '@/components/layout'
-import { VoteButton } from '@/components/vote-button'
-import { ActionButton } from '@/components/action-button'
 import { MarkdownEditor } from '@/components/markdown-editor'
-import {
-  Menu,
-  MenuButton,
-  MenuItemButton,
-  MenuItems,
-  MenuItemsContent,
-} from '@/components/menu'
+import { Menu, MenuButton, MenuItemButton, MenuItems, MenuItemsContent } from '@/components/menu'
+import { OwnerWithDate } from '@/components/owner-with-date'
+import { VoteButton } from '@/components/vote-button'
 
-import {
-  InferQueryOutput,
-  InferQueryPathAndInput,
-  trpc,
-  trpcReducer,
-} from '@/lib/trpc'
+import { InferQueryOutput, InferQueryPathAndInput, trpc, trpcReducer } from '@/lib/trpc'
 import type { NextPageWithAuthAndLayout } from '@/lib/types'
-import { projectReducer } from 'utils/reducer'
 import Link from 'next/link'
+import { projectReducer } from 'utils/reducer'
 
 function getProjectQueryPathAndInput(
-  id: number
+  id: number,
 ): InferQueryPathAndInput<'public.project-detail'> {
   return [
     'public.project-detail',
@@ -65,7 +47,7 @@ const ProjectPage: NextPageWithAuthAndLayout = () => {
   const { data: session } = useSession()
   const router = useRouter()
   const projectQueryPathAndInput = getProjectQueryPathAndInput(
-    Number(router.query.id)
+    Number(router.query.id),
   )
 
   const { state, dispatch } = trpcReducer.useTrpcReducer(
@@ -77,15 +59,12 @@ const ProjectPage: NextPageWithAuthAndLayout = () => {
       arg_2: ['project.vote'],
       arg_3: ['project.undo-vote'],
       arg_4: ['project.invite-to-project'],
-    }
+    },
   )
 
-  const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] =
-    React.useState(false)
-  const [isConfirmHideDialogOpen, setIsConfirmHideDialogOpen] =
-    React.useState(false)
-  const [isConfirmUnhideDialogOpen, setIsConfirmUnhideDialogOpen] =
-    React.useState(false)
+  const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] = React.useState(false)
+  const [isConfirmHideDialogOpen, setIsConfirmHideDialogOpen] = React.useState(false)
+  const [isConfirmUnhideDialogOpen, setIsConfirmUnhideDialogOpen] = React.useState(false)
 
   function handleHide() {
     setIsConfirmHideDialogOpen(true)
@@ -105,8 +84,7 @@ const ProjectPage: NextPageWithAuthAndLayout = () => {
 
   if (state.data && state.data.project) {
     const isUserAdmin = session!?.user.role === 'ADMIN'
-    const projectBelongsToUser =
-      state.data.project.owner.id === session!?.user.id
+    const projectBelongsToUser = state.data.project.owner.id === session!?.user.id
 
     const handleJoinRequest = () => {
       if (!session) return
@@ -127,7 +105,7 @@ const ProjectPage: NextPageWithAuthAndLayout = () => {
             payload: { requestId: state.data.invitedByUser![0].id },
             type: ['project.cancel-request'],
           },
-          { onlyUpdateCache: false, args: { isInvite } }
+          { onlyUpdateCache: false, args: { isInvite } },
         )
       } else {
         dispatch(
@@ -135,7 +113,7 @@ const ProjectPage: NextPageWithAuthAndLayout = () => {
             payload: { requestId: state.data.requestedByUser![0].id },
             type: ['project.cancel-request'],
           },
-          { onlyUpdateCache: false, args: { isInvite } }
+          { onlyUpdateCache: false, args: { isInvite } },
         )
       }
     }
@@ -143,7 +121,7 @@ const ProjectPage: NextPageWithAuthAndLayout = () => {
     const handleInviteRequest = () => {
       dispatch({
         payload: {
-          userId: session!.user.id,
+          userId: session?.user.id,
           projectId: state.data.project.id,
           message: 'this is a invite',
         },
@@ -167,7 +145,7 @@ const ProjectPage: NextPageWithAuthAndLayout = () => {
     }
 
     const myVote = state.data.project.votedBy.filter(
-      (vote) => vote.user.id === session?.user.id
+      (vote) => vote.user.id === session?.user.id,
     )
 
     return (
@@ -176,8 +154,8 @@ const ProjectPage: NextPageWithAuthAndLayout = () => {
           <title>{state.data.project.title} - sideclub</title>
         </Head>
 
-        <div className="divide-y relative divide-primary">
-          <div className="absolute w-12 h-full mt-12 ml-4 flex justify-center">
+        <div className='divide-y relative divide-primary'>
+          <div className='absolute w-12 h-full mt-12 ml-4 flex justify-center'>
             <VoteButton
               votedBy={state.data.project.votedBy}
               onUnVote={() => {
@@ -194,59 +172,58 @@ const ProjectPage: NextPageWithAuthAndLayout = () => {
               onDownvote={() =>
                 handleVote({
                   type: 'DOWN',
-                })
-              }
+                })}
               onUpvote={() =>
                 handleVote({
                   type: 'UP',
-                })
-              }
+                })}
               myVote={myVote ?? []}
             />
           </div>
-          <div className="px-20 py-8 rounded-lg bg-white">
+          <div className='px-20 py-8 rounded-lg bg-white'>
             {state.data.project.hidden && (
-              <Banner className="mb-6">
-                This project has been hidden and is only visible to
-                administrators.
+              <Banner className='mb-6'>
+                This project has been hidden and is only visible to administrators.
               </Banner>
             )}
 
-            <div className="flex items-center justify-between gap-4">
-              <h1 className="text-3xl font-semibold tracking-tighter md:text-4xl">
+            <div className='flex items-center justify-between gap-4'>
+              <h1 className='text-3xl font-semibold tracking-tighter md:text-4xl'>
                 {state.data.project.title}
               </h1>
               {(projectBelongsToUser || isUserAdmin) && (
                 <>
-                  <div className="flex md:hidden">
+                  <div className='flex md:hidden'>
                     <Menu>
                       <MenuButton
                         as={IconButton}
-                        variant="secondary"
-                        title="More"
+                        variant='secondary'
+                        title='More'
                       >
-                        <DotsIcon className="w-4 h-4" />
+                        <DotsIcon className='w-4 h-4' />
                       </MenuButton>
 
-                      <MenuItems className="w-28">
+                      <MenuItems className='w-28'>
                         <MenuItemsContent>
-                          {isUserAdmin &&
-                            (state.data.project.hidden ? (
-                              <MenuItemButton onClick={handleUnhide}>
-                                Unhide
-                              </MenuItemButton>
-                            ) : (
-                              <MenuItemButton onClick={handleHide}>
-                                Hide
-                              </MenuItemButton>
-                            ))}
+                          {isUserAdmin
+                            && (state.data.project.hidden
+                              ? (
+                                <MenuItemButton onClick={handleUnhide}>
+                                  Unhide
+                                </MenuItemButton>
+                              )
+                              : (
+                                <MenuItemButton onClick={handleHide}>
+                                  Hide
+                                </MenuItemButton>
+                              ))}
                           {projectBelongsToUser && (
                             <>
                               <MenuItemButton onClick={handleEdit}>
                                 Edit
                               </MenuItemButton>
                               <MenuItemButton
-                                className="!text-red"
+                                className='!text-red'
                                 onClick={handleDelete}
                               >
                                 Delete
@@ -257,40 +234,42 @@ const ProjectPage: NextPageWithAuthAndLayout = () => {
                       </MenuItems>
                     </Menu>
                   </div>
-                  <div className="hidden md:flex md:gap-4">
-                    {isUserAdmin &&
-                      (state.data.project.hidden ? (
-                        <IconButton
-                          variant="secondary"
-                          title="Unhide"
-                          onClick={handleUnhide}
-                        >
-                          <EyeIcon className="w-4 h-4" />
-                        </IconButton>
-                      ) : (
-                        <IconButton
-                          variant="secondary"
-                          title="Hide"
-                          onClick={handleHide}
-                        >
-                          <EyeClosedIcon className="w-4 h-4" />
-                        </IconButton>
-                      ))}
+                  <div className='hidden md:flex md:gap-4'>
+                    {isUserAdmin
+                      && (state.data.project.hidden
+                        ? (
+                          <IconButton
+                            variant='secondary'
+                            title='Unhide'
+                            onClick={handleUnhide}
+                          >
+                            <EyeIcon className='w-4 h-4' />
+                          </IconButton>
+                        )
+                        : (
+                          <IconButton
+                            variant='secondary'
+                            title='Hide'
+                            onClick={handleHide}
+                          >
+                            <EyeClosedIcon className='w-4 h-4' />
+                          </IconButton>
+                        ))}
                     {projectBelongsToUser && (
                       <>
                         <IconButton
-                          variant="secondary"
-                          title="Edit"
+                          variant='secondary'
+                          title='Edit'
                           onClick={handleEdit}
                         >
-                          <EditIcon className="w-4 h-4" />
+                          <EditIcon className='w-4 h-4' />
                         </IconButton>
                         <IconButton
-                          variant="secondary"
-                          title="Delete"
+                          variant='secondary'
+                          title='Delete'
                           onClick={handleDelete}
                         >
-                          <TrashIcon className="w-4 h-4 text-red" />
+                          <TrashIcon className='w-4 h-4 text-red' />
                         </IconButton>
                       </>
                     )}
@@ -298,25 +277,25 @@ const ProjectPage: NextPageWithAuthAndLayout = () => {
                 </>
               )}
             </div>
-            <div className="mt-6">
+            <div className='mt-6'>
               <OwnerWithDate
                 owner={state.data.project.owner}
                 date={state.data.project.createdAt}
               />
             </div>
-            <HtmlView html={state.data.project.contentHtml} className="mt-8" />
-            <div className=" border-b-2 py-8 ">
-              <span className="border border-secondary rounded-full px-4 py-1 z-10 bg-white inline-flex items-center justify-center font-medium">
+            <HtmlView html={state.data.project.contentHtml} className='mt-8' />
+            <div className=' border-b-2 py-8 '>
+              <span className='border border-secondary rounded-full px-4 py-1 z-10 bg-white inline-flex items-center justify-center font-medium'>
                 python
               </span>
             </div>
-            <div className="flex gap-4 mt-6 clear-both">
+            <div className='flex gap-4 mt-6 clear-both'>
               <ButtonLink
                 href={`/project/${state.data.project.id}#comments`}
-                variant="secondary"
+                variant='secondary'
               >
-                <MessageIcon className="w-4 h-4 text-secondary" />
-                <span className="ml-1.5">
+                <MessageIcon className='w-4 h-4 text-secondary' />
+                <span className='ml-1.5'>
                   {state.data.project.comments.length}
                 </span>
               </ButtonLink>
@@ -325,7 +304,7 @@ const ProjectPage: NextPageWithAuthAndLayout = () => {
                   disabled={!session?.user.id}
                   onAction={handleJoinRequest}
                   didPerformAction={state.data.requestedByUser.some(
-                    (details) => details.user.id === session!.user.id
+                    (details) => details.user.id === session!.user.id,
                   )}
                   isLoading={state.isDispatching}
                   onCancel={() => handleCancelRequest({ isInvite: false })}
@@ -335,22 +314,23 @@ const ProjectPage: NextPageWithAuthAndLayout = () => {
               )}
             </div>
 
-            {state.data.requestedByUser.length ? (
-              <div className="bg-gray-50 px-4 py-2 mt-4 rounded-lg w-fit ">
-                <p className="font-semibold text-lg">
-                  Your membership is waiting on approval
-                </p>
-                <p className="">
-                  You will receive a notification when your request to join is
-                  approved.
-                </p>
-              </div>
-            ) : null}
+            {state.data.requestedByUser.length
+              ? (
+                <div className='bg-gray-50 px-4 py-2 mt-4 rounded-lg w-fit '>
+                  <p className='font-semibold text-lg'>
+                    Your membership is waiting on approval
+                  </p>
+                  <p className=''>
+                    You will receive a notification when your request to join is approved.
+                  </p>
+                </div>
+              )
+              : null}
           </div>
 
-          <div id="comments" className="pt-6 space-y-10">
+          <div id='comments' className='pt-6 space-y-10'>
             {state.data.project.comments.length > 0 && (
-              <ul className="space-y-4">
+              <ul className='space-y-4'>
                 {state.data.project.comments.map((comment) => (
                   <li key={comment.id}>
                     <Comment
@@ -365,27 +345,29 @@ const ProjectPage: NextPageWithAuthAndLayout = () => {
                 ))}
               </ul>
             )}
-            {session?.user ? (
-              <div className="flex items-start gap-2 sm:gap-4">
-                <span className="hidden sm:inline-block">
-                  <Avatar name={session!.user.name} src={session!.user.image} />
-                </span>
-                <span className="inline-block sm:hidden">
-                  <Avatar
-                    name={session!?.user.name}
-                    src={session!?.user.image}
-                    size="sm"
-                  />
-                </span>
-                <AddCommentForm projectId={state.data.project.id} />
-              </div>
-            ) : (
-              <div className="cursor-pointer max-w-fit">
-                <Link href="/sign-in" replace>
-                  Log in to post a comment
-                </Link>
-              </div>
-            )}
+            {session?.user
+              ? (
+                <div className='flex items-start gap-2 sm:gap-4'>
+                  <span className='hidden sm:inline-block'>
+                    <Avatar name={session!.user.name} src={session!.user.image} />
+                  </span>
+                  <span className='inline-block sm:hidden'>
+                    <Avatar
+                      name={session!?.user.name}
+                      src={session!?.user.image}
+                      size='sm'
+                    />
+                  </span>
+                  <AddCommentForm projectId={state.data.project.id} />
+                </div>
+              )
+              : (
+                <div className='cursor-pointer max-w-fit'>
+                  <Link href='/sign-in' replace>
+                    Log in to post a comment
+                  </Link>
+                </div>
+              )}
           </div>
         </div>
 
@@ -421,34 +403,34 @@ const ProjectPage: NextPageWithAuthAndLayout = () => {
   }
 
   return (
-    <div className="animate-pulse">
-      <div className="w-3/4 bg-gray-200 rounded h-9 dark:bg-gray-700" />
-      <div className="flex items-center gap-4 mt-6">
-        <div className="w-12 h-12 bg-gray-200 rounded-full dark:bg-gray-700" />
-        <div className="flex-1">
-          <div className="w-24 h-4 bg-gray-200 rounded dark:bg-gray-700" />
-          <div className="w-32 h-3 mt-2 bg-gray-200 rounded dark:bg-gray-700" />
+    <div className='animate-pulse'>
+      <div className='w-3/4 bg-gray-200 rounded h-9 dark:bg-gray-700' />
+      <div className='flex items-center gap-4 mt-6'>
+        <div className='w-12 h-12 bg-gray-200 rounded-full dark:bg-gray-700' />
+        <div className='flex-1'>
+          <div className='w-24 h-4 bg-gray-200 rounded dark:bg-gray-700' />
+          <div className='w-32 h-3 mt-2 bg-gray-200 rounded dark:bg-gray-700' />
         </div>
       </div>
-      <div className="space-y-3 mt-7">
+      <div className='space-y-3 mt-7'>
         {[...Array(3)].map((_, idx) => (
           <React.Fragment key={idx}>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="h-5 col-span-2 bg-gray-200 rounded dark:bg-gray-700" />
-              <div className="h-5 col-span-1 bg-gray-200 rounded dark:bg-gray-700" />
+            <div className='grid grid-cols-3 gap-4'>
+              <div className='h-5 col-span-2 bg-gray-200 rounded dark:bg-gray-700' />
+              <div className='h-5 col-span-1 bg-gray-200 rounded dark:bg-gray-700' />
             </div>
-            <div className="w-1/2 h-5 bg-gray-200 rounded dark:bg-gray-700" />
-            <div className="grid grid-cols-3 gap-4">
-              <div className="h-5 col-span-1 bg-gray-200 rounded dark:bg-gray-700" />
-              <div className="h-5 col-span-2 bg-gray-200 rounded dark:bg-gray-700" />
+            <div className='w-1/2 h-5 bg-gray-200 rounded dark:bg-gray-700' />
+            <div className='grid grid-cols-3 gap-4'>
+              <div className='h-5 col-span-1 bg-gray-200 rounded dark:bg-gray-700' />
+              <div className='h-5 col-span-2 bg-gray-200 rounded dark:bg-gray-700' />
             </div>
-            <div className="w-3/5 h-5 bg-gray-200 rounded dark:bg-gray-700" />
+            <div className='w-3/5 h-5 bg-gray-200 rounded dark:bg-gray-700' />
           </React.Fragment>
         ))}
       </div>
-      <div className="flex gap-4 mt-6">
-        <div className="w-16 border rounded-full h-button border-secondary" />
-        <div className="w-16 border rounded-full h-button border-secondary" />
+      <div className='flex gap-4 mt-6'>
+        <div className='w-16 border rounded-full h-button border-secondary' />
+        <div className='w-16 border rounded-full h-button border-secondary' />
       </div>
     </div>
   )
@@ -477,14 +459,13 @@ function Comment({
 }) {
   const { data: session } = useSession()
   const [isEditing, setIsEditing] = React.useState(false)
-  const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] =
-    React.useState(false)
+  const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] = React.useState(false)
 
   const commentBelongsToUser = comment.owner.id === session!?.user.id
 
   if (isEditing) {
     return (
-      <div className="flex items-start gap-4">
+      <div className='flex items-start gap-4'>
         <Avatar name={comment.owner.name!} src={comment.owner.image} />
         <EditCommentForm
           projectId={projectId}
@@ -498,53 +479,54 @@ function Comment({
   }
 
   return (
-    <div className="bg-white border-2 border-secondary px-6 py-4 rounded-md">
-      <div className="flex items-center justify-between gap-4">
+    <div className='bg-white border-2 border-secondary px-6 py-4 rounded-md'>
+      <div className='flex items-center justify-between gap-4'>
         <OwnerWithDate owner={comment.owner} date={comment.createdAt} />
-        {commentBelongsToUser ? (
-          <Menu>
-            <MenuButton as={IconButton} variant="secondary" title="More">
-              <DotsIcon className="w-4 h-4" />
-            </MenuButton>
+        {commentBelongsToUser
+          ? (
+            <Menu>
+              <MenuButton as={IconButton} variant='secondary' title='More'>
+                <DotsIcon className='w-4 h-4' />
+              </MenuButton>
 
-            <MenuItems className="w-28">
-              <MenuItemsContent>
-                <MenuItemButton
-                  onClick={() => {
-                    setIsEditing(true)
-                  }}
-                >
-                  Edit
-                </MenuItemButton>
-                <MenuItemButton
-                  className="!text-red"
-                  onClick={() => {
-                    setIsConfirmDeleteDialogOpen(true)
-                  }}
-                >
-                  Delete
-                </MenuItemButton>
-              </MenuItemsContent>
-            </MenuItems>
-          </Menu>
-        ) : (
-          <div>
-            <ActionButton
-              disabled={session && session.user ? true : false}
-              onAction={onInvite}
-              didPerformAction={invitedByOwner.some(
-                (details) => details.project.ownerId === session!.user.id
-              )}
-              isLoading={isLoading}
-              onCancel={onCancel}
-              onActionChildren={<p>Invite</p>}
-              didPerformActionChildren={<p>Cancel</p>}
-            />
-          </div>
-        )}
+              <MenuItems className='w-28'>
+                <MenuItemsContent>
+                  <MenuItemButton
+                    onClick={() => {
+                      setIsEditing(true)
+                    }}
+                  >
+                    Edit
+                  </MenuItemButton>
+                  <MenuItemButton
+                    className='!text-red'
+                    onClick={() => {
+                      setIsConfirmDeleteDialogOpen(true)
+                    }}
+                  >
+                    Delete
+                  </MenuItemButton>
+                </MenuItemsContent>
+              </MenuItems>
+            </Menu>
+          )
+          : (
+            <div>
+              <ActionButton
+                onAction={onInvite}
+                didPerformAction={invitedByOwner.some(
+                  (details) => details.project.ownerId === session?.user.id
+                )}
+                isLoading={isLoading}
+                onCancel={onCancel}
+                onActionChildren={<p>Invite</p>}
+                didPerformActionChildren={<p>Cancel</p>}
+              />
+            </div>
+          )}
       </div>
 
-      <div className="mt-4 pl-11 sm:pl-16">
+      <div className='mt-4 pl-11 sm:pl-16'>
         <HtmlView html={comment.contentHtml} />
       </div>
 
@@ -589,14 +571,14 @@ function AddCommentForm({ projectId }: { projectId: number }) {
           reset({ content: '' })
           setMarkdownEditorKey((markdownEditorKey) => markdownEditorKey + 1)
         },
-      }
+      },
     )
   }
 
   return (
-    <form className="flex-1" onSubmit={handleSubmit(onSubmit)}>
+    <form className='flex-1' onSubmit={handleSubmit(onSubmit)}>
       <Controller
-        name="content"
+        name='content'
         control={control}
         rules={{ required: true }}
         render={({ field }) => (
@@ -606,16 +588,16 @@ function AddCommentForm({ projectId }: { projectId: number }) {
             onChange={field.onChange}
             onTriggerSubmit={handleSubmit(onSubmit)}
             required
-            placeholder="Comment"
+            placeholder='Comment'
             minRows={4}
           />
         )}
       />
-      <div className="mt-4">
+      <div className='mt-4'>
         <Button
-          type="submit"
+          type='submit'
           isLoading={addCommentMutation.isLoading}
-          loadingChildren="Adding comment"
+          loadingChildren='Adding comment'
         >
           Add comment
         </Button>
@@ -658,14 +640,14 @@ function EditCommentForm({
       },
       {
         onSuccess: () => onDone(),
-      }
+      },
     )
   }
 
   return (
-    <form className="flex-1" onSubmit={handleSubmit(onSubmit)}>
+    <form className='flex-1' onSubmit={handleSubmit(onSubmit)}>
       <Controller
-        name="content"
+        name='content'
         control={control}
         rules={{ required: true }}
         render={({ field }) => (
@@ -674,21 +656,21 @@ function EditCommentForm({
             onChange={field.onChange}
             onTriggerSubmit={handleSubmit(onSubmit)}
             required
-            placeholder="Comment"
+            placeholder='Comment'
             minRows={4}
             autoFocus
           />
         )}
       />
-      <div className="flex gap-4 mt-4">
+      <div className='flex gap-4 mt-4'>
         <Button
-          type="submit"
+          type='submit'
           isLoading={editCommentMutation.isLoading}
-          loadingChildren="Updating comment"
+          loadingChildren='Updating comment'
         >
           Update comment
         </Button>
-        <Button variant="secondary" onClick={onDone}>
+        <Button variant='secondary' onClick={onDone}>
           Cancel
         </Button>
       </div>
@@ -722,17 +704,17 @@ function ConfirmDeleteCommentDialog({
     <Dialog isOpen={isOpen} onClose={onClose} initialFocus={cancelRef}>
       <DialogContent>
         <DialogTitle>Delete comment</DialogTitle>
-        <DialogDescription className="mt-6">
+        <DialogDescription className='mt-6'>
           Are you sure you want to delete this comment?
         </DialogDescription>
         <DialogCloseButton onClick={onClose} />
       </DialogContent>
       <DialogActions>
         <Button
-          variant="secondary"
-          className="!text-red"
+          variant='secondary'
+          className='!text-red'
           isLoading={deleteCommentMutation.isLoading}
-          loadingChildren="Deleting comment"
+          loadingChildren='Deleting comment'
           onClick={() => {
             deleteCommentMutation.mutate(commentId, {
               onSuccess: () => onClose(),
@@ -741,7 +723,7 @@ function ConfirmDeleteCommentDialog({
         >
           Delete comment
         </Button>
-        <Button variant="secondary" onClick={onClose} ref={cancelRef}>
+        <Button variant='secondary' onClick={onClose} ref={cancelRef}>
           Cancel
         </Button>
       </DialogActions>
@@ -770,17 +752,17 @@ function ConfirmDeleteDialog({
     <Dialog isOpen={isOpen} onClose={onClose} initialFocus={cancelRef}>
       <DialogContent>
         <DialogTitle>Delete project</DialogTitle>
-        <DialogDescription className="mt-6">
+        <DialogDescription className='mt-6'>
           Are you sure you want to delete this project?
         </DialogDescription>
         <DialogCloseButton onClick={onClose} />
       </DialogContent>
       <DialogActions>
         <Button
-          variant="secondary"
-          className="!text-red"
+          variant='secondary'
+          className='!text-red'
           isLoading={deleteprojectMutation.isLoading}
-          loadingChildren="Deleting project"
+          loadingChildren='Deleting project'
           onClick={() => {
             deleteprojectMutation.mutate(projectId, {
               onSuccess: () => router.push('/'),
@@ -789,7 +771,7 @@ function ConfirmDeleteDialog({
         >
           Delete project
         </Button>
-        <Button variant="secondary" onClick={onClose} ref={cancelRef}>
+        <Button variant='secondary' onClick={onClose} ref={cancelRef}>
           Cancel
         </Button>
       </DialogActions>
@@ -821,16 +803,16 @@ function ConfirmHideDialog({
     <Dialog isOpen={isOpen} onClose={onClose} initialFocus={cancelRef}>
       <DialogContent>
         <DialogTitle>Hide project</DialogTitle>
-        <DialogDescription className="mt-6">
+        <DialogDescription className='mt-6'>
           Are you sure you want to hide this project?
         </DialogDescription>
         <DialogCloseButton onClick={onClose} />
       </DialogContent>
       <DialogActions>
         <Button
-          variant="secondary"
+          variant='secondary'
           isLoading={hideprojectMutation.isLoading}
-          loadingChildren="Hiding project"
+          loadingChildren='Hiding project'
           onClick={() => {
             hideprojectMutation.mutate(projectId, {
               onSuccess: () => {
@@ -842,7 +824,7 @@ function ConfirmHideDialog({
         >
           Hide project
         </Button>
-        <Button variant="secondary" onClick={onClose} ref={cancelRef}>
+        <Button variant='secondary' onClick={onClose} ref={cancelRef}>
           Cancel
         </Button>
       </DialogActions>
@@ -874,16 +856,16 @@ function ConfirmUnhideDialog({
     <Dialog isOpen={isOpen} onClose={onClose} initialFocus={cancelRef}>
       <DialogContent>
         <DialogTitle>Unhide project</DialogTitle>
-        <DialogDescription className="mt-6">
+        <DialogDescription className='mt-6'>
           Are you sure you want to unhide this project?
         </DialogDescription>
         <DialogCloseButton onClick={onClose} />
       </DialogContent>
       <DialogActions>
         <Button
-          variant="secondary"
+          variant='secondary'
           isLoading={unhideprojectMutation.isLoading}
-          loadingChildren="Unhiding project"
+          loadingChildren='Unhiding project'
           onClick={() => {
             unhideprojectMutation.mutate(projectId, {
               onSuccess: () => {
@@ -895,7 +877,7 @@ function ConfirmUnhideDialog({
         >
           Unhide project
         </Button>
-        <Button variant="secondary" onClick={onClose} ref={cancelRef}>
+        <Button variant='secondary' onClick={onClose} ref={cancelRef}>
           Cancel
         </Button>
       </DialogActions>
