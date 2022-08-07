@@ -331,11 +331,12 @@ const ProjectPage: NextPageWithAuthAndLayout = () => {
           <div id='comments' className='pt-6 space-y-10'>
             {state.data.project.comments.length > 0 && (
               <ul className='space-y-4'>
-                {state.data.project.comments.map((comment) => (
+                {state.data.project.comments.filter(comment => comment.private === false).map((comment) => (
                   <li key={comment.id}>
                     <Comment
                       isLoading={state.isDispatching}
-                      onCancel={() => handleCancelRequest({ isInvite: true })}
+                      onCancel={() =>
+                        handleCancelRequest({ isInvite: true })}
                       onInvite={handleInviteRequest}
                       projectId={state.data.project.id}
                       comment={comment}
@@ -515,7 +516,7 @@ function Comment({
               <ActionButton
                 onAction={onInvite}
                 didPerformAction={invitedByOwner.some(
-                  (details) => details.project.ownerId === session?.user.id
+                  (details) => details.project.ownerId === session?.user.id,
                 )}
                 isLoading={isLoading}
                 onCancel={onCancel}

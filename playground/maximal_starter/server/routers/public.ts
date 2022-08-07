@@ -125,6 +125,7 @@ export const publicRouter = createRouter()
               id: true,
               content: true,
               contentHtml: true,
+              private: true,
               createdAt: true,
               owner: {
                 select: {
