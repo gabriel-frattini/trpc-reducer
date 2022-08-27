@@ -15,7 +15,7 @@ export const commentRouter = createProtectedRouter()
         data: {
           content: input.content,
           contentHtml: markdownToHtml(input.content),
-          private: true,
+          private: input.private,
           owner: {
             connect: {
               id: ctx.session.user.id,

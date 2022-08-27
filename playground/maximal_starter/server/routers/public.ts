@@ -47,11 +47,7 @@ export const publicRouter = createRouter()
               userId: true,
             },
           },
-          _count: {
-            select: {
-              comments: true,
-            },
-          },
+          comments: true,
         },
       })
 
@@ -124,8 +120,8 @@ export const publicRouter = createRouter()
             select: {
               id: true,
               content: true,
-              contentHtml: true,
               private: true,
+              contentHtml: true,
               createdAt: true,
               owner: {
                 select: {

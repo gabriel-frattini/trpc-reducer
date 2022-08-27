@@ -49,12 +49,7 @@ export const projectRouter = createProtectedRouter()
                   projectId: true,
                 },
               },
-
-              _count: {
-                select: {
-                  comments: true,
-                },
-              },
+              comments: true,
             },
           },
         },

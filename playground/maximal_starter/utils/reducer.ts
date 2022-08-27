@@ -4,7 +4,7 @@ import { ReducerActions, ReducerOutput } from 'trpc-reducer'
 export function projectReducer(
   state: any,
   action: any,
-  args: { args: { isInvite: boolean } },
+  args: { args: { isInvite: boolean; sessionId: string | number } },
 ): ReducerOutput<AppRouter> {
   const { type, payload } = action
   switch (type[0]) {
@@ -71,9 +71,9 @@ export function projectReducer(
               id: payload.userId,
             },
             project: {
-              ownerId: payload.userId,
+              ownerId: args.args.sessionId,
             },
-            id: payload.id,
+            id: payload.projectId,
           },
         ],
       }

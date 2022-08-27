@@ -28,6 +28,10 @@ export function ProjectSummary({
   )
   const { data: session } = useSession()
 
+  const commentsCount = project.comments.filter((comment) =>
+    active ? comment.private : !comment.private
+  ).length
+
   return (
     <div>
       {project.hidden && (
@@ -95,7 +99,7 @@ export function ProjectSummary({
             <div className="inline-flex items-center gap-1.5">
               <MessageIcon className="w-4 h-4 text-secondary" />
               <span className="text-sm font-semibold tabular-nums">
-                {project._count.comments}
+                {commentsCount}
               </span>
             </div>
           </div>

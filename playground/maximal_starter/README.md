@@ -1,6 +1,6 @@
-## Sideclub
+<h2 align="center">Sideclub</h2>
 
-A simple social network that allows members to share a sideproject idea and invite other members to join them or request to join someone else.
+Sideclub is a simple social network that allows members to share a sideproject idea and invite other members to join them or request to join someone else. Features include a simple Markdown-based editor with preview, join and invite, comments and votes, image drag-and-drop and a clean responsive layout
 
 ## Setup
 
@@ -32,7 +32,7 @@ npx prisma db push
 
 - [Configuring GitHub authentication](doc/github_setup.md)
 
-This starter uses [NextAuth.js](https://next-auth.js.org/), so if you prefer to use one of the [many providers](https://next-auth.js.org/providers/) it supports, you can customize your own installation. Simply update the [`lib/auth.ts`](/lib/auth.ts#L11) file to add your own provider.
+Sideclub uses [NextAuth.js](https://next-auth.js.org/), so if you prefer to use one of the [many providers](https://next-auth.js.org/providers/) it supports, you can customize your own installation. Simply update the [`lib/auth.ts`](/lib/auth.ts#L11) file to add your own provider.
 
 ## Running the app locally
 

@@ -262,7 +262,11 @@ const ProjectPage: NextPageWithAuthAndLayout = () => {
               >
                 <MessageIcon className="w-4 h-4 text-secondary" />
                 <span className="ml-1.5">
-                  {state.data.project.comments.length}
+                  {
+                    state.data.project.comments.filter(
+                      (comment) => comment.private
+                    ).length
+                  }
                 </span>
               </ButtonLink>
             </div>
