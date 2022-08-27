@@ -1,8 +1,17 @@
-<h2 align="center">Sideclub</h2>
+<h2 align="center">Sideclub &#128101; &#128173;</h2>
 
-Sideclub is a simple social network that allows members to share a sideproject idea and invite other members to join them or request to join someone else. Features include a simple Markdown-based editor with preview, join and invite, comments and votes, image drag-and-drop and a clean responsive layout
+![sideclub](https://user-images.githubusercontent.com/96744665/187024508-331490b2-70e1-4591-b3e3-d8ac10fb70a9.jpg)
+
+<h4>sideclub is a simple social network that allows members to share a sideproject idea and invite other members to join them or request to join someone else. &#9997;</h4>
+<h4>Features include a simple Markdown-based editor with preview, join and invite, comments and votes, image drag-and-drop and a clean responsive layout &#9889;</h4>
 
 ## Setup
+
+### Clone the repo
+
+```bash
+git clone https://github.com/gabriel-frattini/sideclub
+```
 
 ### Install dependencies
 
